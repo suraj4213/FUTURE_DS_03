@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Feedback Analytics Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 min-h-screen">
+    <div class="max-w-6xl mx-auto mt-10 p-6 bg-white dark:bg-gray-800 rounded shadow">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Event Feedback Analytics Dashboard</h2>
+            <button id="darkModeToggle" class="px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">🌙</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="p-4 bg-blue-100 dark:bg-blue-900 rounded text-center">
+                <div class="text-gray-700 dark:text-gray-200 font-semibold">Total Responses</div>
+                <div class="text-3xl font-bold">{{ total_responses }}</div>
+            </div>
+            <div class="p-4 bg-green-100 dark:bg-green-900 rounded text-center">
+                <div class="text-gray-700 dark:text-gray-200 font-semibold">Avg. Satisfaction</div>
+                <div class="text-3xl font-bold">{{ avg_satisfaction }}</div>
+            </div>
+            <div class="p-4 bg-yellow-100 dark:bg-yellow-900 rounded text-center">
+                <div class="text-gray-700 dark:text-gray-200 font-semibold">Positive Feedback (%)</div>
+                <div class="text-3xl font-bold">{{ pos_percent }}</div>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                <h5 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3">Sentiment Distribution</h5>
+                <div id="sentiment-bar"></div>
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                <h5 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3">Feedback Categories</h5>
+                <div id="category-pie"></div>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                <h5 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3">Satisfaction Over Time</h5>
+                <div id="satisfaction-line"></div>
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                <h5 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3">Top Events by Satisfaction</h5>
+                <div id="event-bar"></div>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                <h5 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3">Rating Distribution</h5>
+                <div id="satisfaction-histogram"></div>
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                <h5 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3">Department-wise Satisfaction</h5>
+                <div id="department-bar"></div>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+                <h5 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">Top Suggestions for Improvement</h5>
+                <ul class="list-disc pl-6">
+                    {% for suggestion in suggestions %}
+                        <li class="text-gray-800 dark:text-gray-100">
+                            {{ suggestion.suggestion|e }}{% if suggestion.count %} <span class="text-xs text-gray-500">({{ suggestion.count }})</span>{% endif %}
+                        </li>
+                    {% else %}
+                        <li class="text-gray-600 dark:text-gray-300">No suggestions available.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div>
+                <h5 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">Download Analytics Report</h5>
+                <button id="exportPDF" class="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 w-full">Export PDF</button>
+            </div>
+        </div>
+        <div class="flex justify-between mt-6">
+            <a href="/" class="text-blue-600 hover:underline">Back to Feedback Form</a>
+            <a href="/upload" class="text-blue-600 hover:underline">Upload CSV</a>
+        </div>
+    </div>
+    <script>
+    // Dark mode toggle
+    const toggle = document.getElementById('darkModeToggle');
+    toggle.onclick = () => {
+        document.body.classList.toggle('dark');
+        localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+    };
+    if (localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark');
+    }
+    // Plotly charts
+    var sentimentBarData = "{{ sentiment_bar|tojson|safe if sentiment_bar else '' }}";
+    if (sentimentBarData) {
+        var sentimentFig = JSON.parse(sentimentBarData);
+        Plotly.newPlot('sentiment-bar', sentimentFig.data, sentimentFig.layout);
+    }
+    var categoryPieData = "{{ category_pie|tojson|safe if category_pie else '' }}";
+    if (categoryPieData) {
+        var categoryFig = JSON.parse(categoryPieData);
+        Plotly.newPlot('category-pie', categoryFig.data, categoryFig.layout);
+    }
+
+    // Satisfaction over time
+    var satisfactionLineData = "{{ satisfaction_line|tojson|safe if satisfaction_line else '' }}";
+    if (satisfactionLineData && satisfactionLineData.trim() !== '') {
+        try {
+            var lineFig = JSON.parse(satisfactionLineData);
+            Plotly.newPlot('satisfaction-line', lineFig.data, lineFig.layout);
+        } catch(e) {
+            console.error('Error parsing satisfaction line chart:', e);
+        }
+    } else {
+        document.getElementById('satisfaction-line').innerHTML = '<p class="text-gray-500 text-center p-4">No data available for satisfaction trend</p>';
+    }
+    
+    // Event-wise satisfaction
+    var eventBarData = "{{ event_bar|tojson|safe if event_bar else '' }}";
+    if (eventBarData && eventBarData.trim() !== '') {
+        try {
+            var eventFig = JSON.parse(eventBarData);
+            Plotly.newPlot('event-bar', eventFig.data, eventFig.layout);
+        } catch(e) {
+            console.error('Error parsing event bar chart:', e);
+        }
+    } else {
+        document.getElementById('event-bar').innerHTML = '<p class="text-gray-500 text-center p-4">No data available for event-wise analysis</p>';
+    }
+    
+    // Satisfaction Rating Distribution (Histogram)
+    var satisfactionHistogramData = "{{ satisfaction_histogram|tojson|safe if satisfaction_histogram else '' }}";
+    if (satisfactionHistogramData && satisfactionHistogramData.trim() !== '') {
+        try {
+            var histFig = JSON.parse(satisfactionHistogramData);
+            Plotly.newPlot('satisfaction-histogram', histFig.data, histFig.layout);
+        } catch(e) {
+            console.error('Error parsing satisfaction histogram:', e);
+        }
+    } else {
+        document.getElementById('satisfaction-histogram').innerHTML = '<p class="text-gray-500 text-center p-4">No data available for rating distribution</p>';
+    }
+    
+    // Department-wise Satisfaction
+    var departmentBarData = "{{ department_bar|tojson|safe if department_bar else '' }}";
+    if (departmentBarData && departmentBarData.trim() !== '') {
+        try {
+            var deptFig = JSON.parse(departmentBarData);
+            Plotly.newPlot('department-bar', deptFig.data, deptFig.layout);
+        } catch(e) {
+            console.error('Error parsing department bar chart:', e);
+        }
+    } else {
+        document.getElementById('department-bar').innerHTML = '<p class="text-gray-500 text-center p-4">No data available for department-wise analysis</p>';
+    }
+
+    // PDF Export
+    document.getElementById('exportPDF').onclick = function() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'pt', 'a4');
+        html2canvas(document.querySelector('.max-w-6xl')).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            const imgWidth = pageWidth - 40;
+            const imgHeight = canvas.height * imgWidth / canvas.width;
+            doc.addImage(imgData, 'PNG', 20, 20, imgWidth, imgHeight);
+            doc.save('dashboard_report.pdf');
+        });
+    };
+    </script>
+</body>
+</html>
