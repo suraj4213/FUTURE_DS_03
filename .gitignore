@@ -1,0 +1,52 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment variables
+.env
+.env.local
+
+# Excel files (local only - not in git)
+*.xlsx
+*.xls
+feedback_data.xlsx
+
+# Vercel
+.vercel
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
