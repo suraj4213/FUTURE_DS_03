@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Event Feedback CSV</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 min-h-screen">
+    <div class="max-w-2xl mx-auto mt-10 p-6 bg-white dark:bg-gray-800 rounded shadow">
+        <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">Upload Google Forms Feedback CSV</h2>
+        {% if message %}
+            <div class="mb-4 p-3 rounded {{ 'bg-green-200 text-green-800' if 'success' in message else 'bg-red-200 text-red-800' }}">
+                {{ message }}
+            </div>
+        {% endif %}
+        <form action="/upload" method="post" enctype="multipart/form-data" class="mb-6">
+            <input type="file" name="file" accept=".csv" class="block w-full mb-4 p-2 border rounded">
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Upload</button>
+        </form>
+        {% if agg %}
+        <h3 class="text-xl font-semibold mt-6 mb-2 text-gray-700 dark:text-gray-200">Event Summary</h3>
+        <table class="min-w-full bg-white dark:bg-gray-700 rounded">
+            <thead>
+                <tr>
+                    <th class="py-2 px-4 border-b">Event Name</th>
+                    <th class="py-2 px-4 border-b">Avg. Satisfaction</th>
+                    <th class="py-2 px-4 border-b">Top Sentiment</th>
+                    <th class="py-2 px-4 border-b">Responses</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in agg %}
+                <tr>
+                    <td class="py-2 px-4 border-b">{{ row.event_name }}</td>
+                    <td class="py-2 px-4 border-b">{{ row.satisfaction | round(2) }}</td>
+                    <td class="py-2 px-4 border-b">{{ row.sentiment }}</td>
+                    <td class="py-2 px-4 border-b">{{ row.responses }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+        <a href="/" class="inline-block mt-6 text-blue-600 hover:underline">Back to Feedback Form</a>
+    </div>
+</body>
+</html>
