@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Event Feedback Analysis System</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+                /* Toggle knob sliding fallback for Tailwind 2.x */
+                .toggle-knob {
+                    left: 2px;
+                    transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+                }
+                input:checked + .toggle-track + .toggle-knob {
+                    transform: translateX(20px);
+                }
+        html { font-family: 'Inter', sans-serif; }
+        body {
+            background: #f3f4f6;
+        }
+        .dark body {
+            background: #18181b;
+        }
+        .card {
+            background: #fff;
+            border-radius: 1.25rem;
+            box-shadow: 0 4px 24px 0 rgba(31, 38, 135, 0.10);
+            border: 1px solid #e5e7eb;
+        }
+        .dark .card {
+            background: #23272f;
+            border: 1px solid #23272f;
+        }
+        .form-label {
+            font-weight: 600;
+            letter-spacing: 0.01em;
+        }
+        .form-input, .form-select, .form-textarea {
+            background: #f9fafb;
+            color: #22223b;
+            border: 1px solid #e5e7eb;
+            transition: box-shadow 0.2s, border-color 0.2s, background 0.2s, color 0.2s;
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 2px #6366f1;
+        }
+        .dark .form-input, .dark .form-select, .dark .form-textarea {
+            background: #23272f;
+            color: #f3f4f6;
+            border: 1px solid #374151;
+        }
+        .form-btn {
+            background: #6366f1;
+            color: #fff;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .form-btn:hover {
+            background: #4338ca;
+            transform: translateY(-2px) scale(1.03);
+        }
+        .dark .form-btn {
+            background: #6366f1;
+            color: #fff;
+        }
+        .dark .form-btn:hover {
+            background: #4338ca;
+        }
+    </style>
+</head>
+<body class="min-h-screen transition-colors">
+    <div class="max-w-2xl mx-auto mt-12 p-8 card">
+        <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
+            <h2 id="formHeader" class="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-500 dark:text-white" style="background:none!important;">College Event Feedback Analysis System</h2>
+            <label class="relative inline-flex items-center cursor-pointer select-none self-end group">
+                <input type="checkbox" id="darkModeToggle" class="sr-only">
+                <div class="toggle-track w-12 h-7 bg-gray-200 dark:bg-gray-700 rounded-full focus:ring-4 focus:ring-indigo-300 dark:focus:ring-indigo-800 transition duration-300 ease-in-out"></div>
+                <div class="toggle-knob absolute top-0.5 w-6 h-6 bg-white dark:bg-gray-900 rounded-full shadow-md transition-transform duration-300 ease-in-out"></div>
+            </label>
+        </div>
+        <form action="/analyze" method="post" id="feedbackForm" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                <div>
+                    <label for="event_name" class="block text-gray-400 dark:text-gray-200 font-semibold mb-1">Event Name</label>
+                    <select id="event_name" name="event_name" class="form-select w-full p-2 border rounded" required>
+                        <option value="">Select Event</option>
+                        <option value="Tech Symposium">Tech Symposium</option>
+                        <option value="Cultural Fest">Cultural Fest</option>
+                        <option value="Sports Meet">Sports Meet</option>
+                        <option value="Workshop">Workshop</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="event_type" class="block text-gray-400 dark:text-gray-200 font-semibold mb-1">Event Type</label>
+                    <select id="event_type" name="event_type" class="form-select w-full p-2 border rounded" required>
+                        <option value="">Select Type</option>
+                        <option value="workshop">Workshop</option>
+                        <option value="seminar">Seminar</option>
+                        <option value="cultural">Cultural</option>
+                        <option value="technical">Technical</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                <div>
+                    <label for="department" class="block text-gray-400 dark:text-gray-200 font-semibold mb-1">Department</label>
+                    <input type="text" id="department" name="department" class="form-input w-full p-2 border rounded" placeholder="e.g. Computer Science" required>
+                </div>
+                <div>
+                    <label for="year_of_study" class="block text-gray-400 dark:text-gray-200 font-semibold mb-1">Year of Study</label>
+                    <select id="year_of_study" name="year_of_study" class="form-select w-full p-2 border rounded" required>
+                        <option value="">Select Year</option>
+                        <option value="1st">1st Year</option>
+                        <option value="2nd">2nd Year</option>
+                        <option value="3rd">3rd Year</option>
+                        <option value="4th">4th Year</option>
+                        <option value="PG">Postgraduate</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-4">
+                <label for="event_date" class="block text-gray-400 dark:text-gray-200 font-semibold mb-1">Event Date</label>
+                <input type="date" id="event_date" name="event_date" class="form-input w-full p-2 border rounded" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-400 dark:text-gray-200 font-semibold mb-1">Satisfaction Rating</label>
+                <div class="flex items-center space-x-2">
+                    <template id="star-template">
+                        <svg class="w-6 h-6 text-yellow-400 cursor-pointer" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.18c.969 0 1.371 1.24.588 1.81l-3.388 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.388-2.46a1 1 0 00-1.175 0l-3.388 2.46c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1 1 0 00-.364-1.118L2.045 9.394c-.783-.57-.38-1.81.588-1.81h4.18a1 1 0 00.95-.69l1.286-3.967z"/></svg>
+                    </template>
+                    <div id="starRating" class="flex"></div>
+                    <input type="hidden" id="satisfaction" name="satisfaction" required>
+                </div>
+            </div>
+            <div class="mb-4">
+                <label for="liked" class="block text-gray-400 dark:text-gray-200 font-semibold mb-1">What did you like?</label>
+                <textarea id="liked" name="liked" rows="2" class="form-textarea w-full p-2 border rounded" placeholder="Share what you liked most about the event" required></textarea>
+            </div>
+            <div class="mb-4">
+                <label for="suggestions" class="block text-gray-400 dark:text-gray-200 font-semibold mb-1">Suggestions for Improvement</label>
+                <textarea id="suggestions" name="suggestions" rows="2" class="form-textarea w-full p-2 border rounded" placeholder="How can we improve future events?" required></textarea>
+            </div>
+            <div class="mb-4">
+                <label for="comments" class="block text-gray-400 dark:text-gray-200 font-semibold mb-1">Overall Comments</label>
+                <textarea id="comments" name="comments" rows="2" class="form-textarea w-full p-2 border rounded" placeholder="Any other feedback or remarks"></textarea>
+            </div>
+            <div class="mb-4">
+                <span class="block text-gray-400 dark:text-gray-200 font-semibold mb-1">Categories</span>
+                <div class="flex flex-wrap gap-4">
+                    <label class="inline-flex items-center text-gray-400 dark:text-gray-200">
+                        <input type="checkbox" name="categories" value="Speakers" class="mr-2 accent-indigo-500">Speakers
+                    </label>
+                    <label class="inline-flex items-center text-gray-400 dark:text-gray-200">
+                        <input type="checkbox" name="categories" value="Venue" class="mr-2 accent-indigo-500">Venue
+                    </label>
+                    <label class="inline-flex items-center text-gray-400 dark:text-gray-200">
+                        <input type="checkbox" name="categories" value="Organization" class="mr-2 accent-indigo-500">Organization
+                    </label>
+                    <label class="inline-flex items-center text-gray-400 dark:text-gray-200">
+                        <input type="checkbox" name="categories" value="Content" class="mr-2 accent-indigo-500">Content
+                    </label>
+                    <label class="inline-flex items-center text-gray-400 dark:text-gray-200">
+                        <input type="checkbox" name="categories" value="Networking" class="mr-2 accent-indigo-500">Networking
+                    </label>
+                </div>
+            </div>
+            <button type="submit" class="form-btn w-full py-3 px-4 bg-indigo-600 text-white rounded-lg font-semibold text-lg shadow hover:bg-indigo-700">Submit Feedback</button>
+        </form>
+        <div id="analysisResults" class="mt-10 hidden">
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Analysis Results</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="p-6 bg-indigo-100 dark:bg-indigo-900 rounded-xl shadow text-center">
+                    <span class="block text-gray-600 dark:text-gray-300 mb-1">Sentiment</span>
+                    <span id="resultSentiment" class="text-xl font-bold"></span>
+                </div>
+                <div class="p-6 bg-green-100 dark:bg-green-900 rounded-xl shadow text-center">
+                    <span class="block text-gray-600 dark:text-gray-300 mb-1">Satisfaction Level</span>
+                    <span id="resultSatisfaction" class="text-xl font-bold"></span>
+                </div>
+                <div class="p-6 bg-pink-100 dark:bg-pink-900 rounded-xl shadow text-center">
+                    <span class="block text-gray-600 dark:text-gray-300 mb-1">Key Themes</span>
+                    <span id="resultThemes" class="text-xl font-bold"></span>
+                </div>
+            </div>
+        </div>
+        <div class="flex justify-between mt-10">
+            <a href="/dashboard" class="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">View Analytics Dashboard</a>
+            <a href="/upload" class="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">Upload CSV</a>
+        </div>
+    </div>
+    <script src="/static/script.js"></script>
+    <script>
+    // Modern dark mode toggle with animation
+    const toggle = document.getElementById('darkModeToggle');
+    const formHeader = document.getElementById('formHeader');
+    function setTheme(theme) {
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.body.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+            document.body.classList.remove('dark');
+        }
+    }
+    // On load: set theme from localStorage or system
+    document.addEventListener('DOMContentLoaded', function() {
+        const userTheme = localStorage.getItem('theme');
+        if (userTheme) {
+            setTheme(userTheme);
+            toggle.checked = userTheme === 'dark';
+        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            setTheme('dark');
+            toggle.checked = true;
+        } else {
+            setTheme('light');
+            toggle.checked = false;
+        }
+    });
+    toggle.addEventListener('change', function() {
+        const isDark = toggle.checked;
+        setTheme(isDark ? 'dark' : 'light');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+    // Star rating
+    const starRating = document.getElementById('starRating');
+    const satisfactionInput = document.getElementById('satisfaction');
+    for (let i = 1; i <= 5; i++) {
+        const star = document.createElement('span');
+        star.innerHTML = '★';
+        star.className = 'text-2xl cursor-pointer text-gray-400 hover:text-yellow-400';
+        star.dataset.value = i;
+        star.onclick = function() {
+            satisfactionInput.value = i;
+            Array.from(starRating.children).forEach((s, idx) => {
+                s.className = idx < i ? 'text-2xl cursor-pointer text-yellow-400' : 'text-2xl cursor-pointer text-gray-400';
+            });
+        };
+        starRating.appendChild(star);
+    }
+    // Set default rating
+    satisfactionInput.value = 5;
+    Array.from(starRating.children).forEach((s, idx) => {
+        s.className = idx < 5 ? 'text-2xl cursor-pointer text-yellow-400' : 'text-2xl cursor-pointer text-gray-400';
+    });
+    </script>
+</body>
+</html>
